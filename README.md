@@ -78,6 +78,8 @@ Before diving into Kubernetes, it helps to understand the core concepts that mak
 * **[GKE Standard](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/types-of-clusters#standard_clusters)**: You manage the cluster's underlying infrastructure, including node configuration and scaling. Offers maximum control over custom networking setups.
 * **[GKE Autopilot](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview)**: Google manages the nodes and infrastructure entirely; you just deploy Pods and pay for the resources they use. Enforces networking best practices by default.
 
+* **[ComputeClass Concept](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/about-compute-classes)**: Allows you to define node profiles with specific hardware and networking capabilities directly within your cluster configuration.
+
 > **[The "Flat Network" Model](https://kubernetes.io/docs/concepts/cluster-administration/networking/)** ⬇️ ⬇️
 > * **Golden Rule**: Every Pod gets its own IP address.
 > * **No NAT**: Pods on one node communicate with Pods on another node without NAT.
