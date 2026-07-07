@@ -164,7 +164,7 @@ Before diving into Kubernetes, it helps to understand the core concepts that mak
 ### 🤖 AI & High-Performance Networking
 
 * **[RDMA](https://docs.cloud.google.com/vpc/docs/rdma-network-profiles)**: Allows GPUs to exchange data memory-to-memory over the network, bypassing the CPU to drop latency.
-* **[DRANET](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/allocate-network-resources-dra)**: Managed driver for high-end GPUs and TPUs. Ensures NICs are NUMA-aligned with accelerators for maximum bus bandwidth.
+* **[Managed DRANET](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/allocate-network-resources-dra)**: A managed GKE network driver utilizing the Kubernetes Dynamic Resource Allocation (DRA) API. It allows Pods running demanding GPU or TPU workloads to dynamically request and claim dedicated, high-performance network interfaces
 * **[ResourceClaims](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/about-dynamic-resource-allocation#resourceclaim-vs-resourceclaimtemplate)**: K8s API for requesting specific hardware allocations, capacity, or device partitions.
 * **[GKE Inference Gateway](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/about-gke-inference-gateway)**: Gateway API extension for LLMs. Uses Prefix-Cache Aware Routing to send requests to servers with cached prompt contexts.
 * **Endpoint Picker**: Monitors KV-cache and pending queues to route traffic to the most efficient model server.
