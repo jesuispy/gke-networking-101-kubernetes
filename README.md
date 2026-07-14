@@ -7,14 +7,14 @@ This is a quick 101-level reference guide of general Kubernetes networking terms
 *By [Ammett](https://www.linkedin.com/in/ammett/)*
 
 <div align="center">
- <img border="0" valign="middle" src="img/k8s-net-101.gif" alt="Kubernetes Networking 101"/>
+ <img border="0" valign="middle" src="./img/gke101.gif" alt="Kubernetes Networking 101"/>
 </div>
 
 ## Download current version:
 All active links are in the PDF document.
 
 <p align="center">
- <a href="pdf/k8s-networking-101-gke.pdf">
+ <a href="./pdf/network101gke.pdf">
   <img src="https://img.shields.io/badge/Get_PDF-Download-blue?style=for-the-badge&logo=adobeacrobatreader" alt="Download PDF">
  </a>
 </p>
