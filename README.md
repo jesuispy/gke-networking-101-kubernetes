@@ -101,7 +101,9 @@ Before diving into Kubernetes, it helps to understand the core concepts that mak
 * **[Pod CIDR](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/alias-ips#pod_ip_addresses)**: IP range assigned to Pods (a VPC secondary range in VPC-native clusters).
 * **[Service CIDR](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/alias-ips#cluster_sizing)**: A virtual IP range used purely for software-defined ClusterIP services.
 * **[Persistent Pod IPs](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/about-persistent-ip-addresses-for-gke-pods)**: Allows `StatefulSet` pods to retain their exact IP across restarts. Uses config "Reaction Modes" to safely move IPs based on health.
-
+* **[Multi-Networking (Multi-Network Pods)](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/about-multinetwork-support-for-pods)**: Attaches a single Pod to multiple VPC networks simultaneously using Layer 3 secondary ranges, direct `netdevice` NIC passthrough, or high-speed `DPDK` interfaces.
+* **[Single-Stack IPv6](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/single-stack-ipv6)**: Runs clusters purely on IPv6 without IPv4 or alias IP ranges, allocating Pod IPs directly from a natively routable node subrange (with BYOIPv6 support).
+- **[Egress NAT Policy](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/egress-nat-policy-ip-masq-autopilot)**: Autopilot CRD (`EgressNATPolicy`) for configuring `NoSNAT` CIDR destinations so outbound traffic preserves source Pod IPs without directly editing `ip-masq-agent` ConfigMaps.
 
 ### 🔌 Services & Load Balancing
 
@@ -117,6 +119,10 @@ Before diving into Kubernetes, it helps to understand the core concepts that mak
 * **[GRPCRoute](https://docs.cloud.google.com/service-mesh/docs/gateway/overview)**: Protocol-aware routing that matches by gRPC service/method names.
 * **[Network Endpoint Group (NEG)](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/standalone-neg)**: Sends load balancer traffic *directly* to Pod IPs (Container-native load balancing).
 * **[Headless Service](https://kubernetes.io/docs/concepts/services-networking/service/#headless-services)**: A Service (`ClusterIP: None`) that returns backing Pod IPs via DNS instead of a single VIP.
+* **[Multi-Cluster Services & Gateways](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/multi-cluster-gateways)**: Shares Service endpoints (`ServiceExport`/`ServiceImport`) and routes L7 traffic across a fleet of GKE clusters from one unified Google Cloud Load Balancer.
+* **[TLSRoute](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/deploy-tls-passthrough-gateway)**: Gateway API route that forwards encrypted TLS traffic straight to backend Pods via SNI passthrough without terminating TLS at the load balancer.
+* **[Gateway Policies (`GCPBackendPolicy` / `GCPTrafficDistributionPolicy`)](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/configure-gateway-resources)**: Declaratively attaches Cloud Armor, IAP, consistent hashing (`RING_HASH`), and session affinity directly to Gateway API resources *(replaces Ingress `BackendConfig`)*.
+* **[Custom Metrics Load Balancing](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/expose-custom-metrics-load-balancer)**: Exposes Pod Prometheus metrics via `AutoscalingMetric` so Gateways route traffic based on live app utilization (like queue depth) rather than just CPU.
 
 ### 🛡️ Network Security & Policies
 
@@ -127,6 +133,10 @@ Before diving into Kubernetes, it helps to understand the core concepts that mak
 * **[Workload Identity](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/workload-identity)**: Maps a K8s ServiceAccount to a Google IAM Service Account (GSA) for secure GCP API access.
 * **[Private Cluster / Isolation](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/network-isolation)**: Nodes have only private IPs and are isolated from the public internet.
 * **[Tags](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/tags-firewall-policies#about-tags)**: Secures GKE node pools by automatically attaching IAM-controlled firewall tags to your underlying VM nodes.
+* **[ClusterNetworkPolicy (CNP)](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/configure-cluster-network-policy)**: Enforces cluster-wide firewall rules across namespaces using a 3-tier hierarchy (`Admin`, `NetworkPolicy`, and `Baseline`) with `Accept`, `Deny`, and `Pass` delegation actions.
+* **[FQDN Network Policy](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/fqdn-network-policies)**: Dataplane V2 egress policy (`FQDNNetworkPolicy`) that restricts outbound Pod connections by domain name or wildcard (e.g., `*.company.com`) using cluster DNS resolution.
+* **[DNS-Based Control Plane Endpoint](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/network-isolation#dns-based_endpoint)**: Recommended control plane access path hosted on Google Front End (GFE) that secures Kubernetes API connections with IAM policies and VPC Service Controls instead of IP allowlists.
+* **[Inter-Node Transparent Encryption](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/enable-inter-node-transparent-encryption)**: Automatically encrypts Pod-to-Pod traffic moving between nodes in single- or multi-cluster Dataplane V2 environments using Google-managed WireGuard keys.
 
 ### 🗺️ DNS & Service Discovery
 
@@ -142,6 +152,7 @@ Before diving into Kubernetes, it helps to understand the core concepts that mak
 * **[eBPF (Extended Berkeley Packet Filter)](https://ebpf.io/what-is-ebpf/)**: A technology that runs sandboxed programs directly in the Linux kernel without modifying kernel source code, enabling ultra-fast, highly programmable networking, security, and observability.
 * **[GKE Dataplane V2](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/dataplane-v2)**: eBPF-based networking. Removes `kube-proxy` bottlenecks and supports up to 65,000 nodes.
 * **[SCTP Support](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/deploy-workloads-with-sctp)**: Enables reliable, message-oriented transport on Dataplane V2 clusters.
+* **[GKE Ambient Networking](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/ambient-overview)**: Sidecar-less Layer 4 service mesh integrated into Dataplane V2 that uses shared node-level proxies for mTLS, Managed Workload Identity, and Gateway API routing—cutting CPU and memory overhead by up to 90%.
 
 ### 🤔 What happens when a public user hits a Gateway or Ingress?
 
@@ -164,12 +175,14 @@ Before diving into Kubernetes, it helps to understand the core concepts that mak
 ### 🤖 AI & High-Performance Networking
 
 * **[RDMA](https://docs.cloud.google.com/vpc/docs/rdma-network-profiles)**: Allows GPUs to exchange data memory-to-memory over the network, bypassing the CPU to drop latency.
-* **[Managed DRANET](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/allocate-network-resources-dra)**: A managed GKE network driver utilizing the Kubernetes Dynamic Resource Allocation (DRA) API. It allows Pods running demanding GPU or TPU workloads to dynamically request and claim dedicated, high-performance network interfaces
+* **[Managed DRANET](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/allocate-network-resources-dra)**: A managed GKE network driver utilizing the Kubernetes Dynamic Resource Allocation (DRA) API. It allows Pods running demanding GPU or TPU workloads to dynamically request and claim dedicated, high-performance network interfaces.
 * **[ResourceClaims](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/about-dynamic-resource-allocation#resourceclaim-vs-resourceclaimtemplate)**: K8s API for requesting specific hardware allocations, capacity, or device partitions.
 * **[GKE Inference Gateway](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/about-gke-inference-gateway)**: Gateway API extension for LLMs. Uses Prefix-Cache Aware Routing to send requests to servers with cached prompt contexts.
 * **Endpoint Picker**: Monitors KV-cache and pending queues to route traffic to the most efficient model server.
 * **Inference Metrics**: Focuses on Time to First Token (latency) and Tokens per Second (throughput).
+* **[Multi-Cluster Inference Gateway](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/about-multi-cluster-inference-gateway)**: Centralizes LLM traffic routing from a config cluster to exported `InferencePool` backends (`GCPInferencePoolImport`) across multiple target GKE clusters using fleet-wide KV-cache metrics.
 * **[gVNIC](https://cloud.google.com/compute/docs/networking/using-gvnic)**: Google Virtual NIC, required for high-performance VMs.
+
 
 ### 🛠️ Tools & Diagnostics
 
@@ -182,16 +195,17 @@ Before diving into Kubernetes, it helps to understand the core concepts that mak
 * **[Network Policy Logging](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/network-policy-logging)**: Dataplane V2 feature to log allowed/denied connections.
 * **[Connectivity Tests](https://cloud.google.com/network-intelligence-center/docs/connectivity-tests/concepts/overview)**: GCP Console tool to simulate packet paths and debug routing issues.
 
-### 📖 GKE must read networking Documentation
+### 📖 GKE must read networking documentation
 
 * **[GKE Networking Fundamentals](https://docs.cloud.google.com/kubernetes-engine/docs/learn/learn-gke-net-fundamentals)**: The essential conceptual starting point detailing exactly how the abstract open-source Kubernetes IP model maps directly onto Google's global physical VPC architecture.
 * **[Understand IP addressing in GKE](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/about-ip-addressing)**: A deep-dive tracking how VPC-native alias IP allocations work across Node, Pod, and Service CIDR ranges—crucial for preventing IP exhaustion before provisioning clusters.
 * **[GKE Networking Best Practices](https://docs.cloud.google.com/kubernetes-engine/docs/best-practices/networking)**: The foundational guide for enterprise architects.
 * **[GKE Security Hardening Guide](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster)**: Securing traffic flow. Focuses on minimizing control plane exposure, applying least-privilege network firewalls, and isolating workload environments.
-* **[Explore the GKE Documentation](https://docs.cloud.google.com/kubernetes-engine/docs/about#network)**: Use this to quickly navigate between various kubernetes documenation tracks.
-* **[Troubleshoot GKE networking](https://docs.cloud.google.com/kubernetes-engine/docs/troubleshoot-networking)**: Common troubleshooting tips for GKE networking problems
+* **[Explore the GKE Documentation](https://docs.cloud.google.com/kubernetes-engine/docs/about#network)**: Use this to quickly navigate between various kubernetes documentation tracks.
+* **[Troubleshoot GKE networking](https://docs.cloud.google.com/kubernetes-engine/docs/troubleshoot-networking)**: Common troubleshooting tips for GKE networking problems.
+* **[Networking for AI Inference Model Serving on GKE](https://docs.cloud.google.com/architecture/networking-for-ai-inference-gke)**: Reference architecture combining Private Service Connect, Apigee, Model Armor prompt/response screening, and GKE Inference Gateway for LLM serving.
 
 
 <div align="center">
- <img border="0" valign="middle" src="img/sgkenote.png" alt="Kubernetes Networking 101"/>
+ <img border="0" valign="middle" src="img/sgkenote1.png" alt="Kubernetes Networking 101"/>
 </div>
